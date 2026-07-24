@@ -1,0 +1,12 @@
+{% extends "layout/main_layout.html" %}
+{% block body %}
+    <h1>{{ ma_variable }}</h1>
+
+    <ul>
+        {% for item in items %}
+            {% if item.caption % 2 == 0 %}
+                <li><a>{{ item.caption }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endblock %}
