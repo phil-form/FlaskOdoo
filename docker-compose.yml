@@ -1,0 +1,32 @@
+services:
+  app:
+    image: python:3.13.14-trixie
+    command: "bash -c 'pip install  -r requirements.txt && python main.py'"
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - 8080:8080
+
+  db-example:
+    image: postgres:18
+    # .env.local -> dans le gitignore
+    env_file: .env.local # Passer les variables d'env par fichier
+    environment: # Soit les passer directement.
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: 1234
+
+    ports:
+      # Port forward PORT_HOTE->PORT_CONTAINER
+      # PORT_HOTE:PORT_CONTAINER
+      # Dans ce cas le port 127.0.0.1:5435
+      - '5435:5432'
+
+    volumes:
+      # DOSSIER_HOTE:DOSSIER_CONTAINER
+      - ./init_db:/init_db
+      - app-volume:/var/lib/postgresql/18/docker
+
+volumes:
+  app-volume:
