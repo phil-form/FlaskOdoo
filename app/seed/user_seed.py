@@ -1,24 +1,39 @@
-from flask_sqlalchemy import SQLAlchemy
-
-from app.framework.seedable import Seedable
-from app.models.user import User
 from argon2 import PasswordHasher
-from app import db, app
+
+from app import app, db
+from app.framework.seed import Seedable
+from app.models.user import User
 
 
 class UserSeed(Seedable):
+    """Les comptes de démonstration.
+
+    `order` fixe l'ordre d'exécution entre seeders (10, 20, 30... pour pouvoir
+    en insérer un entre deux sans tout renuméroter). Ici il n'y en a qu'un.
+    """
+
+    order = 20
+
+    # (username, mot de passe en clair)
+    USERS = [
+        ("admin", "admin"),
+        ("test", "test"),
+    ]
+
     def seed(self):
-        ph = PasswordHasher()
-        users = [
-            User(username="admin", password=ph.hash("admin")),
-            User(username="test", password=ph.hash("test")),
-        ]
+        hasher = PasswordHasher()
 
-        try:
-            for user in users:
-                app.logger.debug("Add user")
-                db.session.add(user)
+        for username, password in self.USERS:
+            # Idempotence: relancer /seed ne doit pas violer la contrainte
+            # unique sur username.
+            if User.query.filter_by(username=username).first() is not None:
+                app.logger.debug(f"Seed user {username}: déjà présent")
+                continue
 
-            db.session.commit()
-        except Exception as e:
-            app.logger.error(e)
+            app.logger.debug(f"Seed user {username}")
+            # Jamais de mot de passe en clair en base, même pour un jeu de
+            # données de test: on prend les mêmes habitudes partout.
+            db.session.add(User(username=username,
+                                password=hasher.hash(password)))
+
+        db.session.commit()

@@ -1,0 +1,39 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}Seed{% endblock %}
+{% block body %}
+    {#
+        Page de retour de /seed (route enregistrée par app/framework/seed/seed.py,
+        uniquement quand app.debug est vrai).
+    #}
+    <h1 class="h3 mb-4">Seeding</h1>
+
+    {% if seeded %}
+        <div class="alert alert-success">
+            <strong>Exécutés:</strong> {{ seeded | join(', ') }}
+        </div>
+    {% endif %}
+
+    {% if failed %}
+        <div class="alert alert-danger">
+            <strong>En erreur:</strong>
+            <ul class="mb-0">
+                {% for error in failed %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if not seeded and not failed %}
+        <div class="alert alert-warning">
+            Aucun seeder trouvé. Un seeder est une classe qui hérite de
+            <code>Seedable</code> dans <code>app/seed/</code>.
+        </div>
+    {% endif %}
+
+    <p>
+        Les seeders sont idempotents: relancer <code>/seed</code> ne crée pas de
+        doublons.
+    </p>
+    <a class="btn btn-primary" href="{{ url_for('test') }}">Retour à l'accueil</a>
+{% endblock %}
