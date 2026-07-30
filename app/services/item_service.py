@@ -1,11 +1,15 @@
 from app import app, db
 from app.dtos.item_dto import ItemDTO
 from app.forms.item.item_form import ItemForm
+from app.framework.decorators.injectable import injectable
 from app.mappers.item_mapper import ItemMapper
 from app.models.item import Item
 from app.services.base_service import BaseService
 
 
+# @injectable nu = enregistré sous son propre nom, en SINGLETON: le service est
+# sans état, une seule instance suffit pour toute l'application.
+@injectable
 class ItemService(BaseService):
     """CRUD du catalogue. C'est le service le plus simple: prenez-le comme
     modèle quand vous ajoutez une nouvelle entité."""

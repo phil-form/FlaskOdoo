@@ -18,27 +18,29 @@ commande...). En cas d'échec au contraire, on rend le même template: le
 formulaire conserve les saisies et les messages d'erreur.
 
 Rien n'est protégé ici: l'authentification arrive plus tard dans la formation.
+
+Nouveauté de cette étape: les vues ne construisent plus leurs services, elles
+les DÉCLARENT (`item_service: ItemService`) et @inject les fournit. Attention à
+l'ordre des décorateurs: @app.route doit être au-dessus de @inject, sinon Flask
+enregistre la fonction non décorée.
 """
 from flask import flash, redirect, render_template, url_for
 
 from app import app
 from app.forms.item.item_form import ItemForm
+from app.framework.decorators.inject import inject
 from app.services.item_service import ItemService
-
-# Un service par controller, construit une fois à l'import du module.
-# Ça marche parce que les services sont sans état — mais c'est le controller qui
-# choisit l'implémentation, et on ne peut pas la remplacer dans un test.
-# L'étape « injection de dépendances » règle les deux problèmes.
-item_service = ItemService()
 
 
 @app.get('/items')
-def item_list():
+@inject
+def item_list(item_service: ItemService):
     return render_template('items/list.html', items=item_service.find_all())
 
 
 @app.get('/items/<int:item_id>')
-def item_details(item_id: int):
+@inject
+def item_details(item_id: int, item_service: ItemService):
     item = item_service.find_one(item_id)
 
     if item is None:
@@ -49,7 +51,8 @@ def item_details(item_id: int):
 
 
 @app.route('/items/add', methods=['GET', 'POST'])
-def item_add():
+@inject
+def item_add(item_service: ItemService):
     form = ItemForm()
 
     # validate_on_submit() = "la requête est un POST ET le formulaire est
@@ -69,7 +72,8 @@ def item_add():
 
 
 @app.route('/items/<int:item_id>/edit', methods=['GET', 'POST'])
-def item_update(item_id: int):
+@inject
+def item_update(item_id: int, item_service: ItemService):
     item = item_service.find_one(item_id)
 
     if item is None:
@@ -94,7 +98,8 @@ def item_update(item_id: int):
 
 
 @app.post('/items/<int:item_id>/delete')
-def item_delete(item_id: int):
+@inject
+def item_delete(item_id: int, item_service: ItemService):
     """Supprime un article.
 
     En POST et pas en GET: une action qui modifie l'état ne doit jamais être

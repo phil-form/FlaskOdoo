@@ -11,6 +11,7 @@ Ces pages sont exactes à l'étape près.
 - [02 — framework-de-seeding](etapes/02-framework-de-seeding.md)
 - [03 — modele-de-donnees](etapes/03-modele-de-donnees.md)
 - [04 — couches-metier-et-crud](etapes/04-couches-metier-et-crud.md)
+- [05 — injection-de-dependances](etapes/05-injection-de-dependances.md)
 
 ## Exercices
 
@@ -22,6 +23,7 @@ importé à l'étape 09).
 - [02 — framework-de-seeding](exercices/02-framework-de-seeding.md)
 - [03 — modele-de-donnees](exercices/03-modele-de-donnees.md)
 - [04 — couches-metier-et-crud](exercices/04-couches-metier-et-crud.md)
+- [05 — injection-de-dependances](exercices/05-injection-de-dependances.md)
 
 ## Chapitres de référence
 
@@ -29,11 +31,13 @@ Chaque chapitre est ajouté à l'étape qui introduit son sujet.
 Attention: un chapitre est le texte **final** du projet; il peut
 donc mentionner un détail qui n'arrive qu'une étape plus tard.
 
+- [01 — Architecture](01-architecture.md)
 - [02 — Docker & configuration](02-docker-et-configuration.md)
 - [03 — Modèles & relations](03-modeles-et-relations.md)
 - [04 — Migrations (Alembic / Flask-Migrate)](04-migrations.md)
 - [05 — DTOs & mappers](05-dtos-et-mappers.md)
 - [06 — Formulaires (WTForms / Flask-WTF)](06-formulaires.md)
 - [07 — Services](07-services.md)
+- [08 — Injection de dépendances](08-injection-de-dependances.md)
 - [11 — Templates Jinja2](11-templates-jinja.md)
 - [12 — Seeding](12-seeding.md)

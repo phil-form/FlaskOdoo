@@ -13,15 +13,16 @@ le troisième dans le template.
 from flask import render_template
 
 from app import app
+from app.framework.decorators.inject import inject
 from app.services.item_service import ItemService
 
 
+# app.get('/') est un raccourci pour app.route('/', methods=['GET'])
 @app.get('/')
-def index():
-    # Le service est construit à la main: c'est le controller qui décide de
-    # l'implémentation, et il faudra éditer toutes les vues pour en changer.
-    # L'étape « injection de dépendances » supprime cette ligne.
-    item_service = ItemService()
-
+@inject
+def index(item_service: ItemService):
+    # Le nom de la fonction devient le nom du "endpoint": c'est lui qu'on
+    # utilise dans les templates avec url_for('index'). On ne code jamais une
+    # URL en dur: si la route change, url_for suit.
     return render_template('home/home.html',
                            items=item_service.find_all()[:3])

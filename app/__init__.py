@@ -6,9 +6,10 @@ important, il se lit de haut en bas:
 1. charger la configuration (.env)
 2. créer `app` (l'objet Flask) et `db` (SQLAlchemy)
 3. importer les modèles et les controllers
-4. importer les seeds (qui ajoutent la route /seed en debug)
+4. brancher l'injecteur de dépendances
+5. importer les seeds (qui ajoutent la route /seed en debug)
 
-Pourquoi les imports des étapes 3 et 4 sont-ils EN BAS du fichier et pas en haut
+Pourquoi les imports des étapes 3 à 5 sont-ils EN BAS du fichier et pas en haut
 comme le veut PEP8? Parce que app/controllers/xxx.py fait `from app import app`:
 le module app doit donc déjà exister et contenir `app` au moment de cet import.
 C'est l'import circulaire classique d'une application Flask construite autour
@@ -71,7 +72,19 @@ migrate = Migrate(app, db)
 from app.models import *
 from app.controllers import *
 
-# --- 4) seeds ---------------------------------------------------------------
+# --- 4) injection de dépendances -------------------------------------------
+# L'import en étoile des services est ce qui remplit le catalogue: chaque classe
+# décorée @injectable s'enregistre au moment où Python lit sa déclaration. Sans
+# cet import, un service qu'aucun controller n'utilise directement ne serait
+# jamais enregistré. L'injecteur doit donc être créé APRÈS.
+from app.services import *
+from app.framework.injector import Injector
+
+# On instancie ici (et pas dans main.py) pour que l'injecteur existe aussi quand
+# l'app est lancée par `flask run` ou `flask db upgrade`.
+injector = Injector(app)
+
+# --- 5) seeds ---------------------------------------------------------------
 # Même mécanisme: l'import en étoile charge tous les fichiers de app/seed/, et
 # chaque `class XxxSeed(Seedable)` s'enregistre à sa déclaration. Seed(app) n'a
 # donc plus qu'à ajouter la route /seed — et uniquement si app.debug est vrai.
