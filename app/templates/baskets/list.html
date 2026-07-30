@@ -1,0 +1,33 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}Tous les paniers{% endblock %}
+{% block body %}
+    <h1 class="h3 mb-4">Tous les paniers</h1>
+
+    {% for basket in baskets %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <span>
+                    Panier n°{{ basket.basket_id }} —
+                    {# Un panier orphelin ne devrait pas exister, mais on ne
+                       fait pas planter la page pour autant. #}
+                    {{ basket.user.username if basket.user else 'sans propriétaire' }}
+                </span>
+                <span class="badge bg-{{ 'secondary' if basket.closed else 'success' }}">
+                    {{ 'validé' if basket.closed else 'en cours' }}
+                </span>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for item in basket.items %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ item.name }}</span>
+                        <span class="text-muted">x{{ item.quantity }}</span>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">vide</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p class="text-muted">Aucun panier.</p>
+    {% endfor %}
+{% endblock %}

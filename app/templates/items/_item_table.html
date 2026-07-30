@@ -6,11 +6,14 @@
 
         {% include "items/_item_table.html" %}
 
-    Un `include` partage le contexte de la page qui l'inclut: la variable
-    `items` est donc visible ici.
+    Un `include` partage le contexte de la page qui l'inclut: les variables
+    `items`, `is_basket`, `add_form`, `current_user` sont donc visibles ici.
 
-    `items` contient des ItemDTO (et non des entités): les données sont déjà
-    chargées, le template ne peut plus déclencher de requête SQL.
+    Deux usages avec le même fragment (c'est possible parce qu'ItemDTO sait se
+    construire depuis un Item comme depuis un BasketItem):
+    - catalogue (is_basket = false): quantité = stock, actions = voir/éditer
+    - panier   (is_basket = true) : quantité = quantité commandée, actions =
+      mettre à jour / retirer
 #}
 {% from "macros/form_macros.html" import delete_button %}
 
@@ -21,7 +24,7 @@
                 <th scope="col">#</th>
                 <th scope="col">Nom</th>
                 <th scope="col">Description</th>
-                <th scope="col">Stock</th>
+                <th scope="col">{{ 'Quantité' if is_basket else 'Stock' }}</th>
                 <th scope="col">Actions</th>
             </tr>
         </thead>
@@ -31,20 +34,40 @@
                     <th scope="row">{{ item.item_id }}</th>
                     <td>{{ item.name }}</td>
                     <td>{{ item.description | truncate(60) }}</td>
-                    <td>{{ item.stock }}</td>
+                    <td>{{ item.quantity }}</td>
                     <td class="d-flex gap-1 flex-wrap">
-                        <a class="btn btn-sm btn-outline-secondary"
-                           href="{{ url_for('item_details', item_id=item.item_id) }}">Détails</a>
-                        {#
-                            Les actions d'administration ne sont affichées
-                            qu'aux admins. Le template CACHE, il ne protège pas:
-                            la sécurité est @auth_required(level="ADMIN") sur la
-                            vue. Un utilisateur peut toujours taper l'URL.
-                        #}
-                        {% if current_user and current_user.is_admin() %}
-                            <a class="btn btn-sm btn-outline-primary"
-                               href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
-                            {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+                        {% if current_user %}
+                            {#
+                                Un formulaire par ligne: il envoie item_id (caché)
+                                et la quantité choisie vers /basket/add.
+                                Le `value` du champ quantité est la quantité déjà
+                                au panier, ou 1 dans le catalogue.
+                            #}
+                            <form method="post" action="{{ url_for('basket_add_item') }}"
+                                  class="d-flex gap-1">
+                                {{ add_form.hidden_tag() }}
+                                <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                                <input type="number" name="quantity" min="1"
+                                       class="form-control form-control-sm" style="width: 5rem"
+                                       value="{{ item.quantity if is_basket else 1 }}">
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    {{ 'Mettre à jour' if is_basket else 'Au panier' }}
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if is_basket %}
+                            {{ delete_button(url_for('basket_remove_item', item_id=item.item_id),
+                                             label='Retirer',
+                                             confirm='Retirer cet article du panier ?') }}
+                        {% else %}
+                            <a class="btn btn-sm btn-outline-secondary"
+                               href="{{ url_for('item_details', item_id=item.item_id) }}">Détails</a>
+                            {% if current_user and current_user.is_admin() %}
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
+                                {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+                            {% endif %}
                         {% endif %}
                     </td>
                 </tr>

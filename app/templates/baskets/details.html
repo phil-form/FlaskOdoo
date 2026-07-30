@@ -1,0 +1,46 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}Mon panier{% endblock %}
+{% block body %}
+    <h1 class="h3 mb-4">Mon panier</h1>
+
+    {% if basket.is_empty() %}
+        <div class="alert alert-info">
+            Votre panier est vide.
+            <a href="{{ url_for('item_list') }}">Voir le catalogue</a>.
+        </div>
+    {% else %}
+        {#
+            Même fragment que le catalogue, mais is_basket=true: les quantités
+            affichées sont celles du panier et les actions changent.
+            `basket.items` contient des ItemDTO construits depuis des BasketItem.
+        #}
+        {% with items = basket.items, is_basket = true %}
+            {% include "items/_item_table.html" %}
+        {% endwith %}
+
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="mb-0">
+                Total: <strong>{{ basket.total_quantity() }}</strong> article(s)
+            </p>
+            <form method="post" action="{{ url_for('basket_checkout') }}">
+                {# Jeton CSRF sans formulaire WTForms: la fonction csrf_token()
+                   vient de CSRFProtect. #}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success">Valider la commande</button>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if history %}
+        <hr class="my-4">
+        <h2 class="h5">Commandes précédentes</h2>
+        <ul class="list-group">
+            {% for old in history %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Commande n°{{ old.basket_id }}</span>
+                    <span class="text-muted">{{ old.total_quantity() }} article(s)</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

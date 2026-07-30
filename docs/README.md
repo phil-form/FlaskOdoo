@@ -13,6 +13,7 @@ Ces pages sont exactes à l'étape près.
 - [04 — couches-metier-et-crud](etapes/04-couches-metier-et-crud.md)
 - [05 — injection-de-dependances](etapes/05-injection-de-dependances.md)
 - [06 — authentification-et-roles](etapes/06-authentification-et-roles.md)
+- [07 — panier-et-commande](etapes/07-panier-et-commande.md)
 
 ## Exercices
 
@@ -26,6 +27,7 @@ importé à l'étape 09).
 - [04 — couches-metier-et-crud](exercices/04-couches-metier-et-crud.md)
 - [05 — injection-de-dependances](exercices/05-injection-de-dependances.md)
 - [06 — authentification-et-roles](exercices/06-authentification-et-roles.md)
+- [07 — panier-et-commande](exercices/07-panier-et-commande.md)
 
 ## Chapitres de référence
 

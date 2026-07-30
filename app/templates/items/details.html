@@ -13,10 +13,29 @@
     <p>{{ item.description }}</p>
     <p>
         Stock:
+        {#
+            Une expression conditionnelle Jinja, comme en Python:
+            valeur_si_vrai if condition else valeur_si_faux
+        #}
         <span class="badge bg-{{ 'success' if item.stock > 0 else 'secondary' }}">
             {{ item.stock }}
         </span>
     </p>
+
+    {% if current_user %}
+        <form method="post" action="{{ url_for('basket_add_item') }}" class="row g-2 col-md-6">
+            {{ add_form.hidden_tag() }}
+            {# Champ caché: le service revérifie toujours que l'article existe. #}
+            <input type="hidden" name="item_id" value="{{ item.item_id }}">
+            <div class="col-auto">
+                <input type="number" name="quantity" value="1" min="1"
+                       class="form-control" style="width: 6rem">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+            </div>
+        </form>
+    {% endif %}
 
     {% if current_user and current_user.is_admin() %}
         <hr>

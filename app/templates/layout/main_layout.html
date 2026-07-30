@@ -5,6 +5,11 @@
     remplissent `{% block body %}`. C'est de l'héritage de template: on écrit le
     <head>, la navbar et les messages flash UNE fois.
 
+    Deux variables sont disponibles partout sans qu'aucun controller ne les
+    passe:
+    - current_user : fourni par le context_processor de app/__init__.py
+    - config, request, session : fournis par Flask lui-même
+
     Ceci est un commentaire Jinja: il n'apparaît pas dans le HTML envoyé au
     navigateur (contrairement à un <!-- commentaire HTML -->).
 #}
@@ -25,11 +30,8 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
         <div class="container">
-            {#
-                url_for('index') = l'URL de la vue nommée `index`
-                (home_controller.py). Jamais href="/": si la route change,
-                url_for suit.
-            #}
+            {# url_for('index') = l'URL de la vue nommée `index`.
+               Jamais href="/": si la route change, url_for suit. #}
             <a class="navbar-brand" href="{{ url_for('index') }}">Flask MVC</a>
 
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -46,17 +48,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('user_list') }}">Utilisateurs</a>
                     </li>
-                {% endif %}
-                {# La route /seed n'existe qu'en debug: le lien non plus. #}
-                {% if config.DEBUG %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('seed') }}">Seed</a>
+                        <a class="nav-link" href="{{ url_for('basket_list') }}">Paniers</a>
                     </li>
                 {% endif %}
             </ul>
 
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if current_user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('basket_details') }}">Panier</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('profile') }}">
                             {{ current_user.username }}
@@ -83,6 +85,9 @@
             dépose en session, get_flashed_messages() les consomme ici (une
             seule fois). C'est LE moyen d'afficher un message après une
             redirection, puisque la réponse rendue n'est pas celle du POST.
+
+            with_categories=true -> on récupère des tuples (catégorie, message),
+            et la catégorie sert de suffixe aux classes Bootstrap alert-*.
         #}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}

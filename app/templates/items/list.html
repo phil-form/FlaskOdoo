@@ -8,7 +8,17 @@
         {% endif %}
     </div>
 
-    {# Le tableau est dans un fragment séparé: il sera réutilisé par la page
-       panier, plus tard dans la formation. #}
-    {% include "items/_item_table.html" %}
+    {#
+        `with` crée des variables locales au bloc, puis on inclut le fragment
+        partagé avec la page panier. is_basket=false -> mode catalogue.
+    #}
+    {% with is_basket = false %}
+        {% include "items/_item_table.html" %}
+    {% endwith %}
+
+    {% if not current_user %}
+        <p class="text-muted">
+            <a href="{{ url_for('login') }}">Connectez-vous</a> pour remplir un panier.
+        </p>
+    {% endif %}
 {% endblock %}
