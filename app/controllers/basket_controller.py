@@ -67,7 +67,18 @@ def basket_remove_item(item_id: int, basket_service: BasketService,
 @auth_required()
 @inject
 def basket_checkout(basket_service: BasketService, auth_service: AuthService):
-    basket = basket_service.checkout(auth_service.get_current_user().user_id)
+    user = auth_service.get_current_user()
+
+    # Une conséquence CONCRÈTE de la vérification d'adresse: on ne valide pas
+    # une commande vers une adresse dont personne n'a prouvé l'existence.
+    # C'est le bon dosage: on laisse entrer un compte non confirmé (il peut
+    # regarder le catalogue), mais on bloque l'action qui engage.
+    if not user.email_verified:
+        flash("Confirmez votre adresse email avant de valider une commande.",
+              "warning")
+        return redirect(url_for('basket_details'))
+
+    basket = basket_service.checkout(user.user_id)
 
     if basket is None:
         flash("Votre panier est vide.", "warning")

@@ -92,6 +92,24 @@ class UserService(BaseService):
 
         return UserMapper.entity_to_dto(user)
 
+    def mark_email_verified(self, entity_id: int) -> UserDTO | None:
+        """Confirme l'adresse email (appelé par EmailVerificationService)."""
+        user = self.find_one_entity(entity_id)
+
+        if user is None:
+            return None
+
+        user.email_verified = True
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(f"mark email verified {entity_id}: {e}")
+            db.session.rollback()
+            return None
+
+        return UserMapper.entity_to_dto(user)
+
     def update_password(self, entity_id: int, plain_password: str) -> UserDTO | None:
         """Remplace le mot de passe (réinitialisation par mail).
 

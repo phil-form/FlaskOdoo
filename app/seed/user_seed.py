@@ -34,6 +34,10 @@ class UserSeed(Seedable):
             user = User(username=username,
                         email=email,
                         description=description,
+                        # Comptes de démonstration: adresse considérée comme
+                        # vérifiée, sinon /seed obligerait à passer par Mailpit
+                        # avant de pouvoir tester la moindre commande.
+                        email_verified=True,
                         # Jamais de mot de passe en clair en base, même pour un
                         # jeu de données de test: on prend les mêmes habitudes
                         # partout.

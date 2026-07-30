@@ -14,6 +14,7 @@ Ces pages sont exactes à l'étape près.
 - [05 — injection-de-dependances](etapes/05-injection-de-dependances.md)
 - [06 — authentification-et-roles](etapes/06-authentification-et-roles.md)
 - [07 — panier-et-commande](etapes/07-panier-et-commande.md)
+- [08 — mot-de-passe-oublie-mailpit](etapes/08-mot-de-passe-oublie-mailpit.md)
 
 ## Exercices
 
@@ -28,6 +29,7 @@ importé à l'étape 09).
 - [05 — injection-de-dependances](exercices/05-injection-de-dependances.md)
 - [06 — authentification-et-roles](exercices/06-authentification-et-roles.md)
 - [07 — panier-et-commande](exercices/07-panier-et-commande.md)
+- [08 — mot-de-passe-oublie-mailpit](exercices/08-mot-de-passe-oublie-mailpit.md)
 
 ## Chapitres de référence
 

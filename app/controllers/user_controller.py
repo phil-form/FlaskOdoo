@@ -17,12 +17,16 @@ inscription, double commande...) et le navigateur affiche un avertissement.
 from flask import flash, redirect, render_template, request, url_for
 
 from app import app
+from app.forms.user.user_forgot_password_form import UserForgotPasswordForm
 from app.forms.user.user_login_form import UserLoginForm
 from app.forms.user.user_register_form import UserRegisterForm
+from app.forms.user.user_reset_password_form import UserResetPasswordForm
 from app.forms.user.user_update_form import UserUpdateForm
 from app.framework.decorators.auth_required import auth_required
 from app.framework.decorators.inject import inject
 from app.services.auth_service import AuthService
+from app.services.email_verification_service import EmailVerificationService
+from app.services.password_reset_service import PasswordResetService
 from app.services.user_service import UserService
 
 
@@ -73,7 +77,8 @@ def logout(auth_service: AuthService):
 
 @app.route('/register', methods=['GET', 'POST'])
 @inject
-def register(user_service: UserService, auth_service: AuthService):
+def register(user_service: UserService, auth_service: AuthService,
+             email_verification_service: EmailVerificationService):
     if auth_service.is_authenticated():
         return redirect(url_for('index'))
 
@@ -85,10 +90,108 @@ def register(user_service: UserService, auth_service: AuthService):
         if user is None:
             flash("Ce nom d'utilisateur ou cet email est déjà utilisé.", "danger")
         else:
-            flash("Compte créé, vous pouvez vous connecter.", "success")
+            # L'envoi du mail ne conditionne PAS la création du compte: si le
+            # SMTP est en panne, le compte existe et le lien pourra être
+            # redemandé. On ne perd pas une inscription pour un mail.
+            email_verification_service.send_verification_link(user.user_id)
+
+            flash("Compte créé. Un mail vous a été envoyé pour confirmer "
+                  "votre adresse.", "success")
             return redirect(url_for('login'))
 
     return render_template('users/register.html', form=form)
+
+
+# --- vérification de l'adresse email ---------------------------------------
+
+@app.get('/email/verify/<token>')
+@inject
+def email_verify(token: str, email_verification_service: EmailVerificationService):
+    """Le lien reçu par mail après l'inscription.
+
+    Pas d'@auth_required: on doit pouvoir confirmer son adresse sans être
+    connecté (le lien est ouvert depuis un client mail, dans un autre
+    navigateur la plupart du temps). La preuve, c'est le token.
+    """
+    if email_verification_service.verify(token):
+        flash("Adresse confirmée, merci! Vous pouvez vous connecter.", "success")
+        return redirect(url_for('login'))
+
+    flash("Ce lien de confirmation est invalide, expiré, ou déjà utilisé.",
+          "danger")
+
+    return redirect(url_for('index'))
+
+
+@app.post('/email/verify/resend')
+@auth_required()
+@inject
+def email_verify_resend(email_verification_service: EmailVerificationService,
+                        auth_service: AuthService):
+    """Renvoi du lien, depuis le bandeau affiché aux comptes non confirmés.
+
+    En POST: c'est une action (elle envoie un mail), pas une page.
+    """
+    email_verification_service.send_verification_link(
+        auth_service.get_current_user().user_id)
+
+    # Message unique, y compris si l'adresse était déjà confirmée: cette route
+    # ne doit pas devenir un moyen de sonder l'état des comptes.
+    flash("Si votre adresse n'est pas encore confirmée, un nouveau lien vient "
+          "d'être envoyé.", "info")
+
+    return redirect(request.referrer or url_for('index'))
+
+
+# --- mot de passe oublié ----------------------------------------------------
+
+@app.route('/password/forgot', methods=['GET', 'POST'])
+@inject
+def password_forgot(password_reset_service: PasswordResetService,
+                    auth_service: AuthService):
+    if auth_service.is_authenticated():
+        return redirect(url_for('index'))
+
+    form = UserForgotPasswordForm()
+
+    if form.validate_on_submit():
+        password_reset_service.send_reset_link(form.email.data)
+
+        # Message IDENTIQUE que l'adresse existe ou non, et on ignore
+        # volontairement le retour du service. Dire « adresse inconnue »
+        # transformerait cette page en outil pour savoir qui a un compte ici.
+        flash("Si un compte existe pour cette adresse, un lien de "
+              "réinitialisation vient d'être envoyé.", "info")
+
+        return redirect(url_for('login'))
+
+    return render_template('users/forgot_password.html', form=form)
+
+
+@app.route('/password/reset/<token>', methods=['GET', 'POST'])
+@inject
+def password_reset(token: str, password_reset_service: PasswordResetService):
+    """Le lien reçu par mail. Le token est dans l'URL, pas dans un champ."""
+    user = password_reset_service.find_user(token)
+
+    if user is None:
+        flash("Ce lien est invalide, expiré ou déjà utilisé. "
+              "Demandez-en un nouveau.", "danger")
+        return redirect(url_for('password_forgot'))
+
+    form = UserResetPasswordForm()
+
+    if form.validate_on_submit():
+        # Le service revalide le token: entre l'affichage du formulaire et
+        # l'envoi, il a pu expirer ou être consommé ailleurs.
+        if password_reset_service.reset(token, form.password.data):
+            flash("Mot de passe mis à jour, vous pouvez vous connecter.", "success")
+            return redirect(url_for('login'))
+
+        flash("La réinitialisation a échoué, le lien n'est plus valide.", "danger")
+        return redirect(url_for('password_forgot'))
+
+    return render_template('users/reset_password.html', form=form, user=user)
 
 
 # --- profils ----------------------------------------------------------------

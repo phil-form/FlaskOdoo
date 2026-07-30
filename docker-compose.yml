@@ -28,5 +28,18 @@ services:
       - ./init_db:/init_db
       - app-volume:/var/lib/postgresql/18/docker
 
+  # Serveur SMTP "bouchon" pour le développement.
+  # Mailpit accepte tous les mails et n'en envoie AUCUN: il les garde et les
+  # affiche dans une interface web. Indispensable pour travailler sur des envois
+  # (mot de passe oublié, notifications...) sans risquer d'écrire à de vrais
+  # destinataires — et sans compte SMTP à configurer.
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      # 1025 = SMTP: c'est là que l'application dépose ses mails (MAIL_PORT)
+      - '1025:1025'
+      # 8025 = interface web: http://localhost:8025 pour lire les mails reçus
+      - '8025:8025'
+
 volumes:
   app-volume:

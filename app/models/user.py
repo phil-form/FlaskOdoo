@@ -21,6 +21,11 @@ class User(BaseEntity, db.Model):
     password = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False, default="",
                             server_default="")
+    # Adresse confirmée par un lien reçu par mail (voir
+    # EmailVerificationService). server_default=false: les comptes existants au
+    # moment de la migration doivent recevoir une valeur.
+    email_verified = db.Column(db.Boolean, nullable=False, default=False,
+                               server_default=db.false())
 
     # cascade='all, delete-orphan': supprimer un user supprime ses lignes
     # d'association (sinon la base refuserait, à cause des clés étrangères).

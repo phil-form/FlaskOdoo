@@ -1,0 +1,18 @@
+{#
+    Corps du mail de confirmation d'adresse (texte brut).
+    Rendu par EmailVerificationService.send_verification_link().
+#}
+Bonjour {{ username }},
+
+Bienvenue! Il ne reste qu'une étape: confirmer que cette adresse est bien la
+vôtre, en ouvrant ce lien:
+
+    {{ link }}
+
+Ce lien est valable {{ hours }} heures et ne fonctionne qu'une fois.
+
+Si vous n'avez pas créé de compte chez nous, ignorez ce message: aucune adresse
+n'est confirmée sans ce clic, et personne ne peut utiliser la vôtre.
+
+--
+L'équipe Flask MVC

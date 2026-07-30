@@ -14,6 +14,7 @@ class UserDTO(AbstractDTO):
         self.username = None
         self.email = None
         self.description = None
+        self.email_verified = None
         self.roles = []          # liste de RoleDTO
 
     def role_names(self) -> list[str]:
@@ -30,6 +31,7 @@ class UserDTO(AbstractDTO):
         user_dto.username = user.username
         user_dto.email = user.email
         user_dto.description = user.description
+        user_dto.email_verified = user.email_verified
         # user.roles = des UserRole (table d'association), on remonte donc
         # jusqu'au Role via user_role.role.
         user_dto.roles = [RoleDTO.build_from_entity(user_role.role)

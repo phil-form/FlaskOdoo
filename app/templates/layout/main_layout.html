@@ -89,6 +89,26 @@
             with_categories=true -> on récupère des tuples (catégorie, message),
             et la catégorie sert de suffixe aux classes Bootstrap alert-*.
         #}
+        {#
+            Bandeau permanent pour un compte dont l'adresse n'est pas confirmée.
+            Il n'empêche rien: c'est le controller qui refuse le checkout
+            (basket_controller.py). Le bandeau explique, le serveur décide.
+        #}
+        {% if current_user and not current_user.email_verified %}
+            <div class="alert alert-warning d-flex justify-content-between align-items-center">
+                <span>
+                    Votre adresse <strong>{{ current_user.email }}</strong> n'est
+                    pas encore confirmée: vous ne pourrez pas valider de commande.
+                </span>
+                <form method="post" action="{{ url_for('email_verify_resend') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-warning">
+                        Renvoyer le lien
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show">
