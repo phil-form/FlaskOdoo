@@ -1,4 +1,5 @@
 {% extends "layout/main_layout.html" %}
+{% from "macros/form_macros.html" import delete_button %}
 {% block title %}{{ item.name }}{% endblock %}
 {% block body %}
     <nav aria-label="breadcrumb">
@@ -12,12 +13,13 @@
     <p>{{ item.description }}</p>
     <p>
         Stock:
-        {#
-            Une expression conditionnelle Jinja, comme en Python:
-            valeur_si_vrai if condition else valeur_si_faux
-        #}
         <span class="badge bg-{{ 'success' if item.stock > 0 else 'secondary' }}">
             {{ item.stock }}
         </span>
     </p>
+
+    <hr>
+    <a class="btn btn-outline-primary btn-sm"
+       href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
+    {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
 {% endblock %}

@@ -1,0 +1,55 @@
+{#
+    Fragment réutilisable: le tableau d'articles.
+
+    Le nom commence par un underscore par convention: ce n'est pas une page,
+    il n'étend pas le layout et n'est jamais rendu seul. On l'inclut:
+
+        {% include "items/_item_table.html" %}
+
+    Un `include` partage le contexte de la page qui l'inclut: la variable
+    `items` est donc visible ici.
+
+    `items` contient des ItemDTO (et non des entités): les données sont déjà
+    chargées, le template ne peut plus déclencher de requête SQL.
+#}
+{% from "macros/form_macros.html" import delete_button %}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Description</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <th scope="row">{{ item.item_id }}</th>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.description | truncate(60) }}</td>
+                    <td>{{ item.stock }}</td>
+                    <td class="d-flex gap-1 flex-wrap">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           href="{{ url_for('item_details', item_id=item.item_id) }}">Détails</a>
+                        {#
+                            Ces deux actions devraient être réservées à un
+                            administrateur... mais l'authentification n'existe
+                            pas encore: tout le monde peut modifier et
+                            supprimer. C'est exactement ce que l'étape
+                            « authentification & rôles » va corriger.
+                        #}
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
+                        {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" class="text-muted">Aucun article.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

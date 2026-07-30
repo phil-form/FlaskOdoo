@@ -1,0 +1,61 @@
+{#
+    Macros Jinja: des "fonctions" de template.
+
+    Un formulaire Bootstrap, c'est toujours le même bloc: un <label>, le champ,
+    et les messages d'erreur. Plutôt que de le recopier dans chaque page, on
+    l'écrit une fois ici et on l'appelle:
+
+        {% from "macros/form_macros.html" import render_field %}
+        {{ render_field(form.username) }}
+
+    `field` est un objet WTForms. L'appeler comme une fonction — {{ field() }} —
+    génère la balise HTML correspondante (input, textarea, select...) avec le
+    bon type, le bon name et la valeur courante. Les kwargs passés deviennent
+    des attributs HTML (class="...", placeholder="...").
+#}
+
+{% macro render_field(field, placeholder='') %}
+    <div class="mb-3">
+        {{ field.label(class="form-label") }}
+        {#
+            is-invalid: classe Bootstrap qui colore le champ en rouge.
+            `if field.errors else ''` -> les erreurs de validation renvoyées par
+            le serveur sont donc visibles sur le champ concerné.
+        #}
+        {{ field(class="form-control" + (" is-invalid" if field.errors else ""),
+                 placeholder=placeholder or field.label.text) }}
+        {% for error in field.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro render_select(field) %}
+    <div class="mb-3">
+        {{ field.label(class="form-label") }}
+        {{ field(class="form-select" + (" is-invalid" if field.errors else ""), size=4) }}
+        {% for error in field.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{#
+    Bouton de suppression: un mini-formulaire POST déguisé en bouton.
+
+    Pourquoi pas un simple <a href="/items/1/delete">? Parce qu'un lien est un
+    GET: les navigateurs et les robots le suivent tout seuls (préchargement,
+    aperçu de lien...) et supprimeraient les données sans que personne clique.
+    Toute action destructrice passe donc par un POST.
+
+    csrf_token() est la fonction ajoutée aux templates par CSRFProtect
+    (app/__init__.py). Elle génère le jeton attendu par le serveur: sans ce
+    champ caché, la requête est rejetée avec une erreur 400.
+#}
+{% macro delete_button(action, label='Supprimer', confirm='Confirmer la suppression ?') %}
+    <form method="post" action="{{ action }}" class="d-inline"
+          onsubmit="return confirm('{{ confirm }}');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-danger">{{ label }}</button>
+    </form>
+{% endmacro %}

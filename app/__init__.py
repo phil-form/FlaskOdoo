@@ -23,6 +23,7 @@ from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import CSRFProtect
 
 # Load les variables de .env
 load_dotenv()
@@ -40,6 +41,15 @@ app.debug = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
 # La clé qui signe les cookies de session.
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "TestAsdf1234=")
+
+# Protection CSRF globale.
+# FlaskForm valide déjà son jeton, mais CSRFProtect étend le contrôle à TOUTES
+# les requêtes POST/PUT/DELETE, y compris celles qui n'ont pas de formulaire
+# WTForms (nos boutons "supprimer", par exemple). Sans lui, ces routes seraient
+# déclenchables depuis n'importe quel site tiers.
+# Effet de bord pratique: la fonction csrf_token() devient disponible dans les
+# templates.
+csrf = CSRFProtect(app)
 
 # Debug TOOLBAR
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
