@@ -39,10 +39,38 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('item_list') }}">Boutique</a>
                 </li>
+                {% if current_user and current_user.is_admin() %}
+                    {# Ces liens ne sont pas la sécurité: ils sont juste cachés.
+                       Le vrai contrôle est @auth_required(level="ADMIN") côté
+                       Python — un utilisateur peut toujours taper l'URL. #}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user_list') }}">Utilisateurs</a>
+                    </li>
+                {% endif %}
                 {# La route /seed n'existe qu'en debug: le lien non plus. #}
                 {% if config.DEBUG %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('seed') }}">Seed</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                {% if current_user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            {{ current_user.username }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Déconnexion</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Connexion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Inscription</a>
                     </li>
                 {% endif %}
             </ul>

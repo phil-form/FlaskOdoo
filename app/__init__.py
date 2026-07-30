@@ -9,12 +9,12 @@ important, il se lit de haut en bas:
 4. brancher l'injecteur de dépendances
 5. importer les seeds (qui ajoutent la route /seed en debug)
 
-Pourquoi les imports des étapes 3 à 5 sont-ils EN BAS du fichier et pas en haut
-comme le veut PEP8? Parce que app/controllers/xxx.py fait `from app import app`:
-le module app doit donc déjà exister et contenir `app` au moment de cet import.
-C'est l'import circulaire classique d'une application Flask construite autour
-d'un objet `app` global. Python l'accepte parce qu'à ce stade `app` est déjà
-défini dans le module en cours de chargement.
+Pourquoi les imports des étapes 3 à 5 sont-ils EN BAS du fichier et pas en
+haut comme le veut PEP8? Parce que app/controllers/xxx.py fait
+`from app import app`: le module app doit donc déjà exister et contenir `app`
+au moment de cet import. C'est le "circular import" classique de Flask. Python
+l'accepte parce qu'à ce stade `app` est déjà défini dans le module en cours de
+chargement.
 """
 import os
 from pathlib import Path
@@ -36,11 +36,14 @@ if os.path.exists(env_path):
     load_dotenv(env_path, override=True)
 
 app = Flask("app")
-# DEBUG=... dans le .env. Attention au piège: une variable d'environnement est
-# TOUJOURS une chaîne, et bool("False") vaut True. D'où la comparaison explicite.
+# DEBUG=... dans le .env. Le debug active le rechargement automatique, les
+# pages d'erreur détaillées, la toolbar... et la route /seed (voir plus bas).
+# Ne JAMAIS le laisser à True en production: la console interactive de Werkzeug
+# permet d'exécuter du Python arbitraire sur le serveur.
 app.debug = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 
-# La clé qui signe les cookies de session.
+# La clé qui signe les cookies de session et les tokens CSRF.
+# En production elle doit venir de l'environnement et être aléatoire.
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "TestAsdf1234=")
 
 # Protection CSRF globale.
@@ -53,6 +56,8 @@ app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "TestAsdf1234=")
 csrf = CSRFProtect(app)
 
 # Debug TOOLBAR
+# INTERCEPT_REDIRECTS=False: sinon chaque redirection (et on en fait beaucoup
+# en MVC, avec le motif POST -> redirect) affiche une page intermédiaire.
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 toolbar = DebugToolbarExtension(app)
 
@@ -75,8 +80,9 @@ from app.controllers import *
 # --- 4) injection de dépendances -------------------------------------------
 # L'import en étoile des services est ce qui remplit le catalogue: chaque classe
 # décorée @injectable s'enregistre au moment où Python lit sa déclaration. Sans
-# cet import, un service qu'aucun controller n'utilise directement ne serait
-# jamais enregistré. L'injecteur doit donc être créé APRÈS.
+# cet import, un service qu'aucun controller n'utilise directement (comme
+# AuthServiceImpl) ne serait jamais enregistré.
+# L'injecteur doit donc être créé APRÈS.
 from app.services import *
 from app.framework.injector import Injector
 
@@ -85,10 +91,30 @@ from app.framework.injector import Injector
 injector = Injector(app)
 
 # --- 5) seeds ---------------------------------------------------------------
-# Même mécanisme: l'import en étoile charge tous les fichiers de app/seed/, et
-# chaque `class XxxSeed(Seedable)` s'enregistre à sa déclaration. Seed(app) n'a
-# donc plus qu'à ajouter la route /seed — et uniquement si app.debug est vrai.
+# Même mécanisme une quatrième fois: l'import en étoile charge tous les fichiers
+# de app/seed/, et chaque `class XxxSeed(Seedable)` s'enregistre à sa
+# déclaration. Seed(app) n'a donc plus qu'à ajouter la route /seed — et
+# uniquement si app.debug est vrai.
 from app.seed import *
 from app.framework.seed import Seed
 
 seed = Seed(app)
+
+
+# --- utilitaires de template ------------------------------------------------
+@app.context_processor
+def inject_current_user():
+    """Rend `current_user` disponible dans TOUS les templates.
+
+    Un context_processor est une fonction appelée avant chaque rendu, dont le
+    dictionnaire retourné est fusionné avec les variables du template. Ça évite
+    de passer `current_user=...` dans les 15 render_template du projet.
+
+    Le layout peut donc écrire directement:
+        {% if current_user %} ... {% endif %}
+    """
+    from app.services.auth_service import AuthService
+
+    auth_service = app.injector[AuthService.__name__]
+
+    return {'current_user': auth_service.get_current_user()}

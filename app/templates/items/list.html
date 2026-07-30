@@ -3,16 +3,12 @@
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Catalogue</h1>
-        <a class="btn btn-primary" href="{{ url_for('item_add') }}">Nouvel article</a>
+        {% if current_user and current_user.is_admin() %}
+            <a class="btn btn-primary" href="{{ url_for('item_add') }}">Nouvel article</a>
+        {% endif %}
     </div>
 
     {# Le tableau est dans un fragment séparé: il sera réutilisé par la page
        panier, plus tard dans la formation. #}
     {% include "items/_item_table.html" %}
-
-    <div class="alert alert-warning mt-3">
-        <strong>Rien n'est protégé à cette étape</strong>: n'importe quel
-        visiteur peut créer, modifier et supprimer un article. On corrigera ça
-        avec l'authentification et les rôles.
-    </div>
 {% endblock %}

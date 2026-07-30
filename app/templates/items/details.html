@@ -18,8 +18,10 @@
         </span>
     </p>
 
-    <hr>
-    <a class="btn btn-outline-primary btn-sm"
-       href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
-    {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+    {% if current_user and current_user.is_admin() %}
+        <hr>
+        <a class="btn btn-outline-primary btn-sm"
+           href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
+        {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+    {% endif %}
 {% endblock %}

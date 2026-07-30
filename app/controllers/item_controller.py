@@ -17,9 +17,12 @@ un F5 renvoie le formulaire une deuxième fois (double article, double
 commande...). En cas d'échec au contraire, on rend le même template: le
 formulaire conserve les saisies et les messages d'erreur.
 
-Rien n'est protégé ici: l'authentification arrive plus tard dans la formation.
+Les routes d'administration sont désormais protégées par
+@auth_required(level="ADMIN"). Le template cache les boutons, le décorateur
+interdit l'accès: les deux sont nécessaires, et seul le second est de la
+sécurité.
 
-Nouveauté de cette étape: les vues ne construisent plus leurs services, elles
+Rappel de l'étape précédente: les vues ne construisent plus leurs services, elles
 les DÉCLARENT (`item_service: ItemService`) et @inject les fournit. Attention à
 l'ordre des décorateurs: @app.route doit être au-dessus de @inject, sinon Flask
 enregistre la fonction non décorée.
@@ -28,6 +31,7 @@ from flask import flash, redirect, render_template, url_for
 
 from app import app
 from app.forms.item.item_form import ItemForm
+from app.framework.decorators.auth_required import auth_required
 from app.framework.decorators.inject import inject
 from app.services.item_service import ItemService
 
@@ -51,6 +55,7 @@ def item_details(item_id: int, item_service: ItemService):
 
 
 @app.route('/items/add', methods=['GET', 'POST'])
+@auth_required(level="ADMIN")
 @inject
 def item_add(item_service: ItemService):
     form = ItemForm()
@@ -72,6 +77,7 @@ def item_add(item_service: ItemService):
 
 
 @app.route('/items/<int:item_id>/edit', methods=['GET', 'POST'])
+@auth_required(level="ADMIN")
 @inject
 def item_update(item_id: int, item_service: ItemService):
     item = item_service.find_one(item_id)
@@ -98,6 +104,7 @@ def item_update(item_id: int, item_service: ItemService):
 
 
 @app.post('/items/<int:item_id>/delete')
+@auth_required(level="ADMIN")
 @inject
 def item_delete(item_id: int, item_service: ItemService):
     """Supprime un article.

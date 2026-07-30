@@ -1,0 +1,34 @@
+{% extends "layout/main_layout.html" %}
+{% from "macros/form_macros.html" import render_field, render_select %}
+{% block title %}Modifier {{ user.username }}{% endblock %}
+{% block body %}
+    <h1 class="h3 mb-4">Modifier « {{ user.username }} »</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                {{ form.hidden_tag() }}
+
+                {{ render_field(form.email) }}
+                {{ render_field(form.description) }}
+
+                {#
+                    Le champ des rôles n'est montré qu'aux admins. Mais le champ
+                    EXISTE dans le formulaire pour tout le monde: un utilisateur
+                    curieux peut donc le poster à la main. C'est pourquoi le
+                    controller revérifie `current_user.is_admin()` avant
+                    d'appeler update_roles(). Cacher n'est pas protéger.
+                #}
+                {% if current_user.is_admin() %}
+                    {{ render_select(form.roles) }}
+                    <p class="form-text">Ctrl+clic pour sélectionner plusieurs rôles.</p>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <a class="btn btn-link" href="{{ url_for('user_profile', user_id=user.user_id) }}">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

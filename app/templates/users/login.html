@@ -1,0 +1,39 @@
+{% extends "layout/main_layout.html" %}
+{% from "macros/form_macros.html" import render_field %}
+{% block title %}Connexion{% endblock %}
+{% block body %}
+    <h1 class="h3 mb-4">Connexion</h1>
+
+    <div class="row">
+        <div class="col-md-5">
+            {#
+                method="post" et pas d'attribut action: le formulaire est donc
+                envoyé à l'URL courante. Le controller `login` gère GET (afficher)
+                et POST (traiter), c'est le motif habituel en MVC.
+            #}
+            <form method="post">
+                {#
+                    form.hidden_tag() rend tous les champs cachés du formulaire,
+                    dont le jeton CSRF. SANS CETTE LIGNE, validate_on_submit()
+                    renvoie toujours False et le formulaire semble "ne rien faire".
+                #}
+                {{ form.hidden_tag() }}
+
+                {{ render_field(form.username) }}
+                {{ render_field(form.password) }}
+
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+                <a class="btn btn-link" href="{{ url_for('register') }}">Créer un compte</a>
+            </form>
+        </div>
+        <div class="col-md-7">
+            <div class="alert alert-secondary">
+                <strong>Comptes de démonstration</strong> (créés par <code>/seed</code>):
+                <ul class="mb-0">
+                    <li><code>admin</code> / <code>admin</code> — rôles USER + ADMIN</li>
+                    <li><code>test</code> / <code>test</code> — rôle USER</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

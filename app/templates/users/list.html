@@ -1,0 +1,55 @@
+{% extends "layout/main_layout.html" %}
+{% from "macros/form_macros.html" import delete_button %}
+{% block title %}Utilisateurs{% endblock %}
+{% block body %}
+    <h1 class="h3 mb-4">Utilisateurs</h1>
+
+    {#
+        Page réservée aux admins: la vue est décorée par
+        @auth_required(level="ADMIN"). Un visiteur non autorisé n'arrive jamais
+        jusqu'à ce template, il est redirigé avant.
+    #}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Rôles</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <th scope="row">{{ user.user_id }}</th>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {#
+                                user.role_names() est une méthode du DTO:
+                                on peut appeler des méthodes Python depuis un
+                                template. `| join(', ')` est un filtre Jinja.
+                            #}
+                            {{ user.role_names() | join(', ') }}
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               href="{{ url_for('user_profile', user_id=user.user_id) }}">Voir</a>
+                            <a class="btn btn-sm btn-outline-primary"
+                               href="{{ url_for('user_update', user_id=user.user_id) }}">Éditer</a>
+                            {% if user.user_id != current_user.user_id %}
+                                {{ delete_button(url_for('user_delete', user_id=user.user_id),
+                                                 label='Désactiver',
+                                                 confirm='Désactiver ce compte ?') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-muted">Aucun utilisateur.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

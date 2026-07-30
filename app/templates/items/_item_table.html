@@ -36,15 +36,16 @@
                         <a class="btn btn-sm btn-outline-secondary"
                            href="{{ url_for('item_details', item_id=item.item_id) }}">Détails</a>
                         {#
-                            Ces deux actions devraient être réservées à un
-                            administrateur... mais l'authentification n'existe
-                            pas encore: tout le monde peut modifier et
-                            supprimer. C'est exactement ce que l'étape
-                            « authentification & rôles » va corriger.
+                            Les actions d'administration ne sont affichées
+                            qu'aux admins. Le template CACHE, il ne protège pas:
+                            la sécurité est @auth_required(level="ADMIN") sur la
+                            vue. Un utilisateur peut toujours taper l'URL.
                         #}
-                        <a class="btn btn-sm btn-outline-primary"
-                           href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
-                        {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+                        {% if current_user and current_user.is_admin() %}
+                            <a class="btn btn-sm btn-outline-primary"
+                               href="{{ url_for('item_update', item_id=item.item_id) }}">Éditer</a>
+                            {{ delete_button(url_for('item_delete', item_id=item.item_id)) }}
+                        {% endif %}
                     </td>
                 </tr>
             {% else %}

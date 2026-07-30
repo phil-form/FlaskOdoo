@@ -12,6 +12,7 @@ Ces pages sont exactes à l'étape près.
 - [03 — modele-de-donnees](etapes/03-modele-de-donnees.md)
 - [04 — couches-metier-et-crud](etapes/04-couches-metier-et-crud.md)
 - [05 — injection-de-dependances](etapes/05-injection-de-dependances.md)
+- [06 — authentification-et-roles](etapes/06-authentification-et-roles.md)
 
 ## Exercices
 
@@ -24,6 +25,7 @@ importé à l'étape 09).
 - [03 — modele-de-donnees](exercices/03-modele-de-donnees.md)
 - [04 — couches-metier-et-crud](exercices/04-couches-metier-et-crud.md)
 - [05 — injection-de-dependances](exercices/05-injection-de-dependances.md)
+- [06 — authentification-et-roles](exercices/06-authentification-et-roles.md)
 
 ## Chapitres de référence
 
@@ -39,5 +41,7 @@ donc mentionner un détail qui n'arrive qu'une étape plus tard.
 - [06 — Formulaires (WTForms / Flask-WTF)](06-formulaires.md)
 - [07 — Services](07-services.md)
 - [08 — Injection de dépendances](08-injection-de-dependances.md)
+- [09 — Authentification & rôles](09-authentification.md)
+- [10 — Controllers & routes](10-controllers-et-routes.md)
 - [11 — Templates Jinja2](11-templates-jinja.md)
 - [12 — Seeding](12-seeding.md)

@@ -1,0 +1,45 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}{{ user.username }}{% endblock %}
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">{{ user.username }}</h1>
+
+        {#
+            Le lien d'édition n'apparaît que pour le propriétaire du profil ou
+            un admin — exactement la même règle que
+            @auth_required(or_is_current_user=True) sur la vue user_update.
+            Le template cache, le décorateur protège: les deux sont nécessaires.
+        #}
+        {% if current_user and (current_user.user_id == user.user_id or current_user.is_admin()) %}
+            <a class="btn btn-outline-primary"
+               href="{{ url_for('user_update', user_id=user.user_id) }}">Modifier</a>
+        {% endif %}
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">{{ user.email }}</dd>
+
+        <dt class="col-sm-3">Rôles</dt>
+        <dd class="col-sm-9">
+            {% for role in user.roles %}
+                <span class="badge bg-secondary">{{ role.role_name }}</span>
+            {% else %}
+                {# `{% else %}` d'une boucle for: exécuté si la liste est vide.
+                   Ça n'existe pas en HTML, c'est une facilité de Jinja/Python. #}
+                <span class="text-muted">aucun</span>
+            {% endfor %}
+        </dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">{{ user.description or '-' }}</dd>
+    </dl>
+
+    {#
+        Sécurité de l'affichage: Jinja échappe automatiquement les variables
+        (autoescape). Si la description contient <script>alert(1)</script>, elle
+        s'affiche comme du texte au lieu d'être exécutée. C'est la protection
+        contre les failles XSS — ne la désactivez pas avec |safe sur des données
+        saisies par un utilisateur.
+    #}
+{% endblock %}
