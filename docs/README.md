@@ -15,6 +15,7 @@ Ces pages sont exactes à l'étape près.
 - [06 — authentification-et-roles](etapes/06-authentification-et-roles.md)
 - [07 — panier-et-commande](etapes/07-panier-et-commande.md)
 - [08 — mot-de-passe-oublie-mailpit](etapes/08-mot-de-passe-oublie-mailpit.md)
+- [09 — projet-final](etapes/09-projet-final.md)
 
 ## Exercices
 
@@ -30,6 +31,7 @@ importé à l'étape 09).
 - [06 — authentification-et-roles](exercices/06-authentification-et-roles.md)
 - [07 — panier-et-commande](exercices/07-panier-et-commande.md)
 - [08 — mot-de-passe-oublie-mailpit](exercices/08-mot-de-passe-oublie-mailpit.md)
+- [09 — projet-final](exercices/09-projet-final.md)
 
 ## Chapitres de référence
 
@@ -49,3 +51,5 @@ donc mentionner un détail qui n'arrive qu'une étape plus tard.
 - [10 — Controllers & routes](10-controllers-et-routes.md)
 - [11 — Templates Jinja2](11-templates-jinja.md)
 - [12 — Seeding](12-seeding.md)
+- [13 — Exercices](13-exercices.md)
+- [Projet d'équipe — Helpdesk « Delvaux & Fils »](14-projet-equipe-helpdesk-framework-maison.md)
