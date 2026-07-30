@@ -1,0 +1,26 @@
+{#
+    Page de démonstration Jinja2 (route /jinja, test_controller.py).
+
+    Trois syntaxes à retenir:
+      {{ ... }}  -> affiche une expression
+      {% ... %}  -> instruction (if, for, extends, block...)
+      {# ... #}  -> commentaire, jamais envoyé au navigateur
+#}
+{% extends "layout/main_layout.html" %}
+{% block title %}Démo Jinja{% endblock %}
+{% block body %}
+    <h1>{{ ma_variable }}</h1>
+
+    <p class="text-muted">
+        Les nombres tirés au hasard, filtrés pour ne garder que les pairs.
+    </p>
+
+    <ul>
+        {% for item in items %}
+            {# On peut utiliser les opérateurs Python dans un {% if %} #}
+            {% if item.caption % 2 == 0 %}
+                <li>{{ item.caption }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endblock %}

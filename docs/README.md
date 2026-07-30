@@ -9,6 +9,7 @@ Ces pages sont exactes à l'étape près.
 
 - [01 — base-flask-jinja-sqlalchemy](etapes/01-base-flask-jinja-sqlalchemy.md)
 - [02 — framework-de-seeding](etapes/02-framework-de-seeding.md)
+- [03 — modele-de-donnees](etapes/03-modele-de-donnees.md)
 
 ## Exercices
 
@@ -18,6 +19,7 @@ importé à l'étape 09).
 
 - [01 — base-flask-jinja-sqlalchemy](exercices/01-base-flask-jinja-sqlalchemy.md)
 - [02 — framework-de-seeding](exercices/02-framework-de-seeding.md)
+- [03 — modele-de-donnees](exercices/03-modele-de-donnees.md)
 
 ## Chapitres de référence
 
@@ -26,5 +28,6 @@ Attention: un chapitre est le texte **final** du projet; il peut
 donc mentionner un détail qui n'arrive qu'une étape plus tard.
 
 - [02 — Docker & configuration](02-docker-et-configuration.md)
+- [03 — Modèles & relations](03-modeles-et-relations.md)
 - [04 — Migrations (Alembic / Flask-Migrate)](04-migrations.md)
 - [12 — Seeding](12-seeding.md)

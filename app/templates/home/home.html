@@ -1,12 +1,38 @@
 {% extends "layout/main_layout.html" %}
+{% block title %}Accueil{% endblock %}
 {% block body %}
-    <h1>{{ ma_variable }}</h1>
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <h1>Bienvenue!</h1>
+        <p class="lead">
+            Projet de formation Flask: MVC, SQLAlchemy, WTForms et seeding.
+        </p>
+    </div>
 
-    <ul>
-        {% for item in items %}
-            {% if item.caption % 2 == 0 %}
-                <li><a>{{ item.caption }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
+    {# `items` peut être une liste vide (base pas encore seedée):
+       en Jinja, `{% if items %}` est faux pour une liste vide, comme en Python. #}
+    {% if items %}
+        <h2 class="h4">Quelques articles</h2>
+        <div class="row">
+            {% for item in items %}
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            {# `truncate` est un filtre Jinja: valeur | filtre(args) #}
+                            <p class="card-text">{{ item.description | truncate(80) }}</p>
+                            <a href="{{ url_for('item_details', item_id=item.item_id) }}"
+                               class="btn btn-sm btn-primary">Voir</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('item_list') }}">Tout le catalogue &rarr;</a>
+    {% else %}
+        <div class="alert alert-info">
+            Le catalogue est vide. En mode debug, visitez
+            <a href="{{ url_for('seed') }}">/seed</a> pour insérer les données de
+            démonstration.
+        </div>
+    {% endif %}
 {% endblock %}

@@ -1,0 +1,49 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}Boutique{% endblock %}
+{% block body %}
+    <h1 class="h3 mb-4">Catalogue</h1>
+
+    {#
+        ATTENTION — ce que fait cette page est volontairement critiquable:
+        `items` contient des ENTITÉS SQLAlchemy, pas des objets de transport.
+        Deux conséquences que l'étape suivante corrigera:
+
+        1. accéder à une relation depuis le template (item.basket_items par
+           exemple) déclencherait une requête SQL en pleine page;
+        2. le template connaît le schéma de la base: renommer une colonne casse
+           toutes les vues qui l'utilisent.
+
+        On s'en sert ici parce qu'on n'a encore ni service ni DTO: c'est le
+        problème que l'étape 04 résout.
+    #}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <th scope="row">{{ item.item_id }}</th>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.description | truncate(60) }}</td>
+                        <td>{{ item.stock }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               href="{{ url_for('item_details', item_id=item.item_id) }}">Détails</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    {# `{% else %}` d'une boucle for: exécuté si la liste est vide. #}
+                    <tr><td colspan="5" class="text-muted">Aucun article.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

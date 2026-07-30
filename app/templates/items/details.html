@@ -1,0 +1,23 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}{{ item.name }}{% endblock %}
+{% block body %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('item_list') }}">Catalogue</a></li>
+            <li class="breadcrumb-item active">{{ item.name }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3">{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <p>
+        Stock:
+        {#
+            Une expression conditionnelle Jinja, comme en Python:
+            valeur_si_vrai if condition else valeur_si_faux
+        #}
+        <span class="badge bg-{{ 'success' if item.stock > 0 else 'secondary' }}">
+            {{ item.stock }}
+        </span>
+    </p>
+{% endblock %}

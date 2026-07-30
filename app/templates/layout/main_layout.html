@@ -26,17 +26,18 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
         <div class="container">
             {#
-                url_for('test') = l'URL de la vue nommée `test` (le nom de la
-                fonction dans test_controller.py). Jamais href="/": si la route
-                change, url_for suit.
-                À l'étape suivante cette vue sera renommée `index`, dans un
-                home_controller — et c'est le seul endroit à corriger.
+                url_for('index') = l'URL de la vue nommée `index`
+                (home_controller.py). Jamais href="/": si la route change,
+                url_for suit.
             #}
-            <a class="navbar-brand" href="{{ url_for('test') }}">Flask MVC</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">Flask MVC</a>
 
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('test') }}">Accueil</a>
+                    <a class="nav-link" href="{{ url_for('index') }}">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('item_list') }}">Boutique</a>
                 </li>
                 {# La route /seed n'existe qu'en debug: le lien non plus. #}
                 {% if config.DEBUG %}
