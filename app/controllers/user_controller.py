@@ -26,6 +26,7 @@ from app.framework.decorators.auth_required import auth_required
 from app.framework.decorators.inject import inject
 from app.services.auth_service import AuthService
 from app.services.email_verification_service import EmailVerificationService
+from app.services.login_attempt_service import LoginAttemptService
 from app.services.password_reset_service import PasswordResetService
 from app.services.user_service import UserService
 
@@ -34,7 +35,8 @@ from app.services.user_service import UserService
 
 @app.route('/login', methods=['GET', 'POST'])
 @inject
-def login(user_service: UserService, auth_service: AuthService):
+def login(user_service: UserService, auth_service: AuthService,
+          login_attempt_service: LoginAttemptService):
     if auth_service.is_authenticated():
         return redirect(url_for('index'))
 
@@ -43,9 +45,24 @@ def login(user_service: UserService, auth_service: AuthService):
     # validate_on_submit() = "la requête est un POST ET le formulaire est
     # valide" (jeton CSRF inclus). C'est le seul test à écrire.
     if form.validate_on_submit():
+        # Le verrou est vérifié AVANT toute vérification de mot de passe: un
+        # compte bloqué ne doit même pas coûter un hachage argon2 au serveur.
+        bloque = login_attempt_service.locked_seconds(form.username.data)
+
+        if bloque > 0:
+            # Ici le mieux serait encore d'envoyer un email.
+            flash(f"Trop de tentatives. Réessayez dans "
+                  f"{max(1, bloque // 60)} minute(s).", "danger")
+            return render_template('users/login.html', form=form)
+
         user = user_service.login(form)
 
-        if user is not None:
+        if user is None:
+            # Échec: on compte. Y compris pour un identifiant qui n'existe pas,
+            # sinon il suffirait d'alterner les noms pour n'être jamais bloqué.
+            login_attempt_service.record_failure(form.username.data)
+        else:
+            login_attempt_service.record_success(form.username.data)
             auth_service.login(user)
             flash(f"Bienvenue {user.username}!", "success")
 

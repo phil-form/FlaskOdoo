@@ -16,6 +16,7 @@ Ces pages sont exactes à l'étape près.
 - [07 — panier-et-commande](etapes/07-panier-et-commande.md)
 - [08 — mot-de-passe-oublie-mailpit](etapes/08-mot-de-passe-oublie-mailpit.md)
 - [09 — projet-final](etapes/09-projet-final.md)
+- [10 — limiteur-de-tentatives](etapes/10-limiteur-de-tentatives.md)
 
 ## Exercices
 
@@ -32,6 +33,7 @@ importé à l'étape 09).
 - [07 — panier-et-commande](exercices/07-panier-et-commande.md)
 - [08 — mot-de-passe-oublie-mailpit](exercices/08-mot-de-passe-oublie-mailpit.md)
 - [09 — projet-final](exercices/09-projet-final.md)
+- [10 — limiteur-de-tentatives](exercices/10-limiteur-de-tentatives.md)
 
 ## Chapitres de référence
 
@@ -53,3 +55,4 @@ donc mentionner un détail qui n'arrive qu'une étape plus tard.
 - [12 — Seeding](12-seeding.md)
 - [13 — Exercices](13-exercices.md)
 - [Projet d'équipe — Helpdesk « Delvaux & Fils »](14-projet-equipe-helpdesk-framework-maison.md)
+- [15 — Limiter les tentatives de connexion](15-limitation-des-tentatives.md)
