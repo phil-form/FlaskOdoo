@@ -24,6 +24,7 @@ from app.forms.user.user_reset_password_form import UserResetPasswordForm
 from app.forms.user.user_update_form import UserUpdateForm
 from app.framework.decorators.auth_required import auth_required
 from app.framework.decorators.inject import inject
+from app.framework.rate_limiter import rate_limit
 from app.services.auth_service import AuthService
 from app.services.email_verification_service import EmailVerificationService
 from app.services.login_attempt_service import LoginAttemptService
@@ -34,6 +35,10 @@ from app.services.user_service import UserService
 # --- authentification -------------------------------------------------------
 
 @app.route('/login', methods=['GET', 'POST'])
+# 10 requêtes/minute/IP: complète le verrou par compte de l'étape 10. Le verrou
+# protège UN compte, la limite de débit protège le serveur — et ralentit celui
+# qui essaie mille comptes différents avec le mot de passe « 123456 ».
+@rate_limit(10, 60)
 @inject
 def login(user_service: UserService, auth_service: AuthService,
           login_attempt_service: LoginAttemptService):
@@ -50,7 +55,6 @@ def login(user_service: UserService, auth_service: AuthService,
         bloque = login_attempt_service.locked_seconds(form.username.data)
 
         if bloque > 0:
-            # Ici le mieux serait encore d'envoyer un email.
             flash(f"Trop de tentatives. Réessayez dans "
                   f"{max(1, bloque // 60)} minute(s).", "danger")
             return render_template('users/login.html', form=form)
@@ -93,6 +97,8 @@ def logout(auth_service: AuthService):
 
 
 @app.route('/register', methods=['GET', 'POST'])
+# Création de comptes en série: 5 par minute suffisent largement à un humain.
+@rate_limit(5, 60)
 @inject
 def register(user_service: UserService, auth_service: AuthService,
              email_verification_service: EmailVerificationService):
@@ -141,6 +147,8 @@ def email_verify(token: str, email_verification_service: EmailVerificationServic
 
 
 @app.post('/email/verify/resend')
+# Envoie un mail elle aussi.
+@rate_limit(3, 60)
 @auth_required()
 @inject
 def email_verify_resend(email_verification_service: EmailVerificationService,
@@ -163,6 +171,9 @@ def email_verify_resend(email_verification_service: EmailVerificationService,
 # --- mot de passe oublié ----------------------------------------------------
 
 @app.route('/password/forgot', methods=['GET', 'POST'])
+# Cette route ENVOIE UN MAIL: sans limite, on peut inonder la boîte de
+# quelqu'un depuis notre application (et se faire blacklister au passage).
+@rate_limit(5, 60)
 @inject
 def password_forgot(password_reset_service: PasswordResetService,
                     auth_service: AuthService):

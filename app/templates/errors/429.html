@@ -1,0 +1,17 @@
+{% extends "layout/main_layout.html" %}
+{% block title %}Trop de requêtes{% endblock %}
+{% block body %}
+    <div class="alert alert-warning">
+        <h1 class="h4">Trop de requêtes</h1>
+        <p class="mb-0">
+            Vous avez envoyé trop de requêtes en peu de temps.
+            Réessayez dans <strong>{{ retry_after }}</strong> seconde(s).
+        </p>
+    </div>
+    {#
+        Le code HTTP est 429 (Too Many Requests) et la réponse porte un en-tête
+        Retry-After: c'est ce que lisent les clients corrects (navigateurs,
+        bibliothèques HTTP, robots d'indexation) pour ralentir d'eux-mêmes.
+        Renvoyer une page 200 « réessayez plus tard » serait invisible pour eux.
+    #}
+{% endblock %}

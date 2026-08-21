@@ -90,6 +90,13 @@ from app.framework.injector import Injector
 # l'app est lancée par `flask run` ou `flask db upgrade`.
 injector = Injector(app)
 
+# --- 4 bis) limitation de débit --------------------------------------------
+# Après les controllers (les routes existent), avant la première requête.
+# L'instance s'accroche à `app` (app.rate_limiter) et pose son before_request.
+from app.framework.rate_limiter import RateLimiter
+
+rate_limiter = RateLimiter(app)
+
 # --- 5) seeds ---------------------------------------------------------------
 # Même mécanisme une quatrième fois: l'import en étoile charge tous les fichiers
 # de app/seed/, et chaque `class XxxSeed(Seedable)` s'enregistre à sa
