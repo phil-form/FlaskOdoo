@@ -19,12 +19,15 @@ chargement.
 import os
 from pathlib import Path
 
+from datetime import timedelta
+
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Load les variables de .env
 load_dotenv()
@@ -45,6 +48,48 @@ app.debug = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 # La clé qui signe les cookies de session et les tokens CSRF.
 # En production elle doit venir de l'environnement et être aléatoire.
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "TestAsdf1234=")
+
+# --- HTTPS et cookies ------------------------------------------------------
+# L'application ne fait pas le TLS elle-même en production: c'est le reverse
+# proxy (nginx, le WAF de l'étape suivante, un load balancer) qui le termine et
+# qui parle en HTTP clair à Flask. Deux conséquences.
+#
+# 1. ProxyFix. Sans lui, Flask croit que la requête est arrivée en HTTP sur
+#    l'IP du proxy: request.is_secure est faux (le cookie Secure ne part pas),
+#    url_for(_external=True) fabrique des liens http://, et remote_addr est le
+#    proxy — donc TOUS les visiteurs partagent la même limite de débit.
+#    ProxyFix lit X-Forwarded-Proto / -For / -Host, en ne faisant confiance qu'au
+#    NOMBRE de proxys déclaré: ces en-têtes sont triviaux à falsifier, x_for=2
+#    alors qu'il n'y a qu'un proxy laisse le client injecter la valeur suivante.
+TRUSTED_PROXIES = int(os.environ.get("TRUSTED_PROXIES", 0))
+
+if TRUSTED_PROXIES > 0:
+    app.wsgi_app = ProxyFix(app.wsgi_app,
+                            x_for=TRUSTED_PROXIES, x_proto=TRUSTED_PROXIES,
+                            x_host=TRUSTED_PROXIES, x_prefix=TRUSTED_PROXIES)
+
+# 2. Le durcissement des cookies. Chaque option traite un risque précis:
+app.config.update(
+    # HTTPONLY: le cookie devient invisible à document.cookie. Une faille XSS ne
+    # permet plus de VOLER la session (elle permet encore d'agir en votre nom,
+    # mais l'attaquant n'emporte pas le cookie chez lui).
+    SESSION_COOKIE_HTTPONLY=True,
+    # SECURE: le navigateur n'envoie plus le cookie en clair. Sans ça, une seule
+    # requête HTTP (un lien, une image) suffit à faire fuiter la session sur le
+    # réseau. On ne l'active pas en debug, sinon plus aucune session en local.
+    SESSION_COOKIE_SECURE=not app.debug,
+    # SAMESITE=Lax: le cookie n'est pas envoyé sur les requêtes POST venant d'un
+    # autre site. C'est une deuxième barrière contre le CSRF, en plus du jeton.
+    # 'Strict' casserait les liens entrants (on arrive déconnecté).
+    SESSION_COOKIE_SAMESITE='Lax',
+    # Durée de vie de la session "permanente" (voir AuthServiceImpl.login).
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=int(os.environ.get("SESSION_HOURS", 8))),
+    # Les mêmes règles pour le cookie CSRF de flask-wtf.
+    WTF_CSRF_SSL_STRICT=True,
+    # url_for(_external=True) (les liens dans les mails) doit produire du https
+    # en production.
+    PREFERRED_URL_SCHEME='http' if app.debug else 'https',
+)
 
 # Protection CSRF globale.
 # FlaskForm valide déjà son jeton, mais CSRFProtect étend le contrôle à TOUTES
@@ -106,6 +151,44 @@ from app.seed import *
 from app.framework.seed import Seed
 
 seed = Seed(app)
+
+
+# --- en-têtes de sécurité ---------------------------------------------------
+@app.after_request
+def ajouter_entetes_de_securite(response):
+    """Quelques en-têtes qui coûtent une ligne et bloquent des classes d'attaques.
+
+    Ils s'appliquent à TOUTES les réponses, y compris les erreurs: un after_request
+    est le seul endroit où on est sûr de ne rien oublier.
+    """
+    # Empêche le navigateur de "devimer" le type d'un fichier: un .txt uploadé
+    # ne sera pas exécuté comme du JavaScript parce qu'il en a l'air.
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    # Interdit l'affichage du site dans une iframe (clickjacking).
+    response.headers.setdefault('X-Frame-Options', 'DENY')
+    # Ne fuite pas l'URL complète (avec ses tokens!) vers les sites externes.
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    # CSP: la défense en profondeur contre le XSS. Ici volontairement large parce
+    # que le projet charge Bootstrap depuis un CDN et utilise des scripts inline
+    # dans les templates. Une vraie CSP se construit en resserrant petit à petit
+    # (voir les exercices).
+    response.headers.setdefault(
+        'Content-Security-Policy',
+        "default-src 'self'; "
+        "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+        "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "frame-ancestors 'none'")
+
+    # HSTS: "pour les 6 prochains mois, ne me parle plus jamais en HTTP".
+    # Uniquement sur une réponse déjà servie en HTTPS — l'envoyer en HTTP n'a
+    # aucun sens, et le poser trop tôt rend un domaine inaccessible si le
+    # certificat expire. À n'activer qu'une fois le HTTPS stable.
+    if request.is_secure:
+        response.headers.setdefault('Strict-Transport-Security',
+                                    'max-age=15552000; includeSubDomains')
+
+    return response
 
 
 # --- utilitaires de template ------------------------------------------------

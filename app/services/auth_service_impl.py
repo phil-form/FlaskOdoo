@@ -55,6 +55,23 @@ class AuthServiceImpl(AuthService):
         return self.__current_user
 
     def login(self, user: UserDTO):
+        # ROTATION DE SESSION. Attaque évitée: la « session fixation ».
+        # Un attaquant vous fait utiliser un identifiant de session qu'il connaît
+        # (lien piégé, cookie injecté par un sous-domaine, XSS ailleurs sur le
+        # domaine). Vous vous connectez... et il possède maintenant une session
+        # authentifiée: c'est la VÔTRE.
+        #
+        # La parade est toujours la même: à l'élévation de privilège (connexion),
+        # on repart d'une session vierge. Flask ne donne pas de
+        # "regenerate_id()" — sa session vit entièrement dans le cookie signé —
+        # mais session.clear() a le même effet utile: tout ce que la session
+        # contenait avant la connexion est jeté, et le cookie renvoyé est
+        # nouveau.
+        #
+        # À faire aussi lors d'un changement de mot de passe, ou d'un passage en
+        # administrateur.
+        session.clear()
+
         session['user_id'] = user.user_id
         # permanent = la session survit à la fermeture du navigateur
         # (durée réglée par app.permanent_session_lifetime).

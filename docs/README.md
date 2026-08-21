@@ -18,6 +18,7 @@ Ces pages sont exactes à l'étape près.
 - [09 — projet-final](etapes/09-projet-final.md)
 - [10 — limiteur-de-tentatives](etapes/10-limiteur-de-tentatives.md)
 - [11 — limiteur-de-requetes](etapes/11-limiteur-de-requetes.md)
+- [12 — https-et-cookies](etapes/12-https-et-cookies.md)
 
 ## Exercices
 
@@ -36,6 +37,7 @@ importé à l'étape 09).
 - [09 — projet-final](exercices/09-projet-final.md)
 - [10 — limiteur-de-tentatives](exercices/10-limiteur-de-tentatives.md)
 - [11 — limiteur-de-requetes](exercices/11-limiteur-de-requetes.md)
+- [12 — https-et-cookies](exercices/12-https-et-cookies.md)
 
 ## Chapitres de référence
 
@@ -59,3 +61,4 @@ donc mentionner un détail qui n'arrive qu'une étape plus tard.
 - [Projet d'équipe — Helpdesk « Delvaux & Fils »](14-projet-equipe-helpdesk-framework-maison.md)
 - [15 — Limiter les tentatives de connexion](15-limitation-des-tentatives.md)
 - [16 — Limiter le débit (rate limiting)](16-limitation-de-debit.md)
+- [17 — HTTPS, cookies et en-têtes](17-https-et-cookies.md)

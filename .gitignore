@@ -7,3 +7,5 @@ init_db/*
 
 __pycache__
 *.pyc
+# Certificats de développement (générés par certs/generer.sh)
+certs/*.pem
