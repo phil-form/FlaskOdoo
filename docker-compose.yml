@@ -41,5 +41,52 @@ services:
       # 8025 = interface web: http://localhost:8025 pour lire les mails reçus
       - '8025:8025'
 
+  # WAF (Web Application Firewall) devant l'application.
+  #
+  # Image officielle OWASP: nginx + ModSecurity + le CRS (Core Rule Set), le jeu
+  # de règles générique qui reconnaît les injections SQL, le XSS, les traversées
+  # de chemin, les scanners...
+  #
+  # Il ne REMPLACE pas les protections de l'application: c'est une couche de
+  # plus, qui arrête le bruit avant qu'il n'atteigne Python et qui laisse une
+  # trace de ce qui a été tenté.
+  waf:
+    image: owasp/modsecurity-crs:nginx
+    depends_on:
+      - app
+    environment:
+      # Vers qui le WAF transmet ce qu'il laisse passer.
+      BACKEND: http://app:8080
+      SERVER_NAME: localhost
+      PORT: 8080
+
+      # On/DetectionOnly/Off — le réglage le plus important.
+      # DetectionOnly journalise sans bloquer: c'est TOUJOURS par là qu'on
+      # commence sur une application existante, le temps de repérer les faux
+      # positifs. On passe à On ensuite.
+      MODSEC_RULE_ENGINE: On
+
+      # Niveau de paranoïa 1 à 4: plus haut = plus de règles, plus de faux
+      # positifs. 1 en production sur une app classique, 2 si on a le temps de
+      # traiter les exclusions.
+      PARANOIA: 1
+
+      # Score à partir duquel on bloque (les règles ajoutent des points).
+      ANOMALY_INBOUND: 5
+      ANOMALY_OUTBOUND: 4
+
+      MODSEC_AUDIT_LOG: /dev/stdout
+      MODSEC_AUDIT_ENGINE: RelevantOnly
+
+    ports:
+      # On entre par le WAF: http://localhost:8081
+      # L'application, elle, n'est plus publiée directement (voir le service app).
+      - '8081:8080'
+
+    volumes:
+      # Nos propres règles et exclusions (faux positifs).
+      - ./waf/rules:/opt/owasp-crs/rules/custom:ro
+      - ./waf/exclusions.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:ro
+
 volumes:
   app-volume:
