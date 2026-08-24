@@ -14,7 +14,18 @@ from app.services.user_service import UserService
 #
 # scope=SCOPED: ce service mémorise l'utilisateur courant. En SINGLETON, le
 # premier visiteur imposerait son identité à tous les suivants.
-@injectable(base=AuthService, scope=Scope.SCOPED)
+# @injectable RETIRÉ à cette étape: c'est AuthServiceJwt qui est désormais
+# enregistré comme implémentation de AuthService (voir auth_service_jwt.py).
+#
+# Le fichier est conservé volontairement: comparer les deux implémentations côte
+# à côte est plus parlant qu'un `git log`. Pour revenir à la session, il suffit
+# de déplacer le décorateur — et rien d'autre ne change dans l'application.
+#
+# Attention: deux classes décorées avec base=AuthService en même temps, et la
+# dernière importée gagne, silencieusement (ordre alphabétique des fichiers).
+# Une seule à la fois.
+#
+# @injectable(base=AuthService, scope=Scope.SCOPED)
 class AuthServiceImpl(AuthService):
     """Implémentation "site web": l'identité vit dans la session Flask.
 

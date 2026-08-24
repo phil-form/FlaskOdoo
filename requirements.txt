@@ -26,3 +26,5 @@ Werkzeug==3.1.8
 WTForms==3.2.2
 # Nécessaire pour `ssl_context='adhoc'` (HTTPS de développement, étape 12).
 cryptography==46.0.3
+# JWT (étape 14): encodage et décodage des tokens signés.
+PyJWT==2.10.1

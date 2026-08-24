@@ -20,6 +20,7 @@ Ces pages sont exactes à l'étape près.
 - [11 — limiteur-de-requetes](etapes/11-limiteur-de-requetes.md)
 - [12 — https-et-cookies](etapes/12-https-et-cookies.md)
 - [13 — waf-modsecurity](etapes/13-waf-modsecurity.md)
+- [14 — jwt-au-lieu-de-session](etapes/14-jwt-au-lieu-de-session.md)
 
 ## Exercices
 
@@ -40,6 +41,7 @@ importé à l'étape 09).
 - [11 — limiteur-de-requetes](exercices/11-limiteur-de-requetes.md)
 - [12 — https-et-cookies](exercices/12-https-et-cookies.md)
 - [13 — waf-modsecurity](exercices/13-waf-modsecurity.md)
+- [14 — jwt-au-lieu-de-session](exercices/14-jwt-au-lieu-de-session.md)
 
 ## Chapitres de référence
 
@@ -65,3 +67,4 @@ donc mentionner un détail qui n'arrive qu'une étape plus tard.
 - [16 — Limiter le débit (rate limiting)](16-limitation-de-debit.md)
 - [17 — HTTPS, cookies et en-têtes](17-https-et-cookies.md)
 - [18 — Un WAF devant l'application](18-waf-modsecurity.md)
+- [19 — JWT: authentification par token](19-jwt.md)
