@@ -38,7 +38,15 @@ class UserService(BaseService):
         return UserMapper.entity_to_dto(user) if user else None
 
     def find_one_entity(self, entity_id: int) -> User | None:
-        return User.query.filter_by(user_id=entity_id).first()
+        # active=True: un compte désactivé (soft delete, voir `delete`) n'existe
+        # plus pour l'application — c'est déjà la règle de `find_all`, elle vaut
+        # ici aussi.
+        #
+        # Ce filtre n'est pas cosmétique, c'est un contrôle d'accès. `AuthService`
+        # relit le compte à CHAQUE requête (session comme JWT): sans lui, un
+        # compte désactivé reste connecté tant que son cookie ou son token vit,
+        # et un lien de réinitialisation de mot de passe suffit à le ranimer.
+        return User.query.filter_by(user_id=entity_id, active=True).first()
 
     def find_one_by(self, **kwargs) -> User | None:
         """Retourne une ENTITÉ (utilisé par le login, qui a besoin du hash)."""

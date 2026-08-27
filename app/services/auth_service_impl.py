@@ -59,7 +59,11 @@ class AuthServiceImpl(AuthService):
             if user_id is not None:
                 self.__current_user = self.__user_service.find_one(user_id)
 
-                # Compte supprimé/désactivé entre-temps: on nettoie la session.
+                # Compte supprimé ou DÉSACTIVÉ entre-temps: on nettoie la
+                # session. C'est ce qui rend la désactivation d'un compte
+                # immédiate — `find_one` ne rend que les comptes actifs, donc
+                # `soft_delete()` déconnecte, sans attendre l'expiration du
+                # cookie.
                 if self.__current_user is None:
                     session.pop('user_id', None)
 

@@ -48,7 +48,13 @@ app.debug = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
 # La clé qui signe les cookies de session et les tokens CSRF.
 # En production elle doit venir de l'environnement et être aléatoire.
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "TestAsdf1234=")
-app.config['JWT_SECRET'] = os.environ.get("JWT_SECRET", "TestAsdf1234=")
+
+# La clé qui signe les JWT (étape 14). DISTINCTE de SECRET_KEY: ce sont deux
+# usages, deux durées de vie et deux rotations. Faire tourner la clé de session
+# ne doit pas invalider les tokens des clients d'API, et l'inverse non plus.
+# Le défaut est volontairement différent de celui de SECRET_KEY: deux clés
+# identiques par défaut annulent la séparation sans que ça se voie.
+app.config['JWT_SECRET'] = os.environ.get("JWT_SECRET", "JwtTestAsdf1234=")
 
 # --- HTTPS et cookies ------------------------------------------------------
 # L'application ne fait pas le TLS elle-même en production: c'est le reverse

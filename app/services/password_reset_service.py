@@ -11,6 +11,7 @@ from app.framework.decorators.inject import inject
 from app.framework.decorators.injectable import injectable
 from app.mappers.user_mapper import UserMapper
 from app.services.mail_service import MailService
+from app.services.refresh_token_service import RefreshTokenService
 from app.services.user_service import UserService
 
 
@@ -41,9 +42,11 @@ class PasswordResetService:
     SALT = 'password-reset'
 
     @inject
-    def __init__(self, user_service: UserService, mail_service: MailService):
+    def __init__(self, user_service: UserService, mail_service: MailService,
+                 refresh_token_service: RefreshTokenService):
         self.__user_service = user_service
         self.__mail_service = mail_service
+        self.__refresh_token_service = refresh_token_service
         self.__max_age = int(os.environ.get("PASSWORD_RESET_MAX_AGE", 3600))
         self.__serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'],
                                                    salt=self.SALT)
@@ -98,7 +101,17 @@ class PasswordResetService:
         if user is None:
             return False
 
-        return self.__user_service.update_password(user.user_id, new_password) is not None
+        if self.__user_service.update_password(user.user_id, new_password) is None:
+            return False
+
+        # Changer le mot de passe doit DÉCONNECTER PARTOUT. Sinon quelqu'un qui a
+        # volé un refresh token garde l'accès pendant des jours, alors que la
+        # victime croit avoir repris le contrôle en changeant son mot de passe.
+        # C'est le scénario exact pour lequel on a rendu les refresh tokens
+        # révocables.
+        self.__refresh_token_service.revoke_all_for_user(user.user_id)
+
+        return True
 
     # --- interne ------------------------------------------------------------
 
