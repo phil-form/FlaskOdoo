@@ -58,6 +58,7 @@ class EmailVerificationService:
         token = self.__serializer.dumps({'user_id': user.user_id,
                                          'email': user.email})
 
+        # https://domain.name/user/email_verfy?token=MONTOKEN
         link = url_for('email_verify', token=token, _external=True)
 
         body = render_template('emails/email_verification.txt',

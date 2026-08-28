@@ -4,9 +4,23 @@ Les cinq routes typiques d'une ressource en MVC:
 
     GET  /items              liste
     GET  /items/<id>         détail
-    GET  /items/add          formulaire de création       (+ POST pour créer)
-    GET  /items/<id>/edit    formulaire de modification   (+ POST pour modifier)
-    POST /items/<id>/delete  suppression
+    GET  /items/add          formulaire de création       (+ POST pour créer) -> EN API POST /items
+    GET  /items/<id>/edit    formulaire de modification   (+ POST pour modifier) -> en API PUT /items/<id>
+    POST /items/<id>/delete  suppression -> en API DELETE /items/<id>
+
+    Donc dans le controller APi vous aurez :
+    @api.get("/api/items")
+    def get_items()
+    @api.get("/api/items/<id>")
+    def get_one_item()
+    @api.post("/api/items")
+    def post_item(..)
+    @api.put("/api/items/<id>")
+    def put_item(...)
+    @api.delete("/api/items/<id>")
+    def delete_item(...)
+    @api.put("/api/items/<id>/enable")
+    def enable_item(..)
 
 En API REST on utiliserait les verbes PUT et DELETE, mais un formulaire HTML ne
 sait envoyer que GET et POST: en MVC on reste donc sur POST pour toute action

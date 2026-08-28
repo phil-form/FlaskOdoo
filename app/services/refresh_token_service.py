@@ -77,11 +77,16 @@ class RefreshTokenService:
 
     # --- rotation ----------------------------------------------------------
 
-    def rotate(self, token: str) -> tuple[int, str] | None:
-        """Consomme un token et en émet un nouveau. Retourne (user_id, token).
+    def rotate(self, token: str) -> tuple[int, str, str] | None:
+        """Consomme un token et en émet un nouveau.
 
-        Retourne None si le token est inconnu, expiré, ou déjà consommé — et dans
-        ce dernier cas, révoque toute la famille.
+        Retourne `(user_id, nouveau_token, family_id)`, ou None si le token est
+        inconnu, expiré, ou déjà consommé — et dans ce dernier cas, révoque
+        toute la famille.
+
+        Le `family_id` fait partie du retour parce que l'appelant en a besoin
+        pour le claim `fam` du nouvel access token: la rotation reste dans la
+        MÊME famille, et c'est elle que la déconnexion révoquera.
         """
         ligne = self.__find(token)
 
@@ -112,7 +117,7 @@ class RefreshTokenService:
 
         nouveau = self.issue(ligne.user_id, family_id=ligne.family_id)
 
-        return (ligne.user_id, nouveau) if nouveau else None
+        return (ligne.user_id, nouveau, ligne.family_id) if nouveau else None
 
     # --- révocation --------------------------------------------------------
 

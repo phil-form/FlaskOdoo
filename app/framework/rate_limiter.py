@@ -6,6 +6,8 @@ from threading import Lock
 
 from flask import Flask, render_template, request
 
+from app.framework.api import json_error
+
 
 class RateLimiter:
     """Limiteur de débit par IP, en fenêtre fixe.
@@ -111,8 +113,25 @@ class RateLimiter:
 
         return None
 
-    def too_many_requests(self, retry_after: int):
-        """La réponse 429, avec l'en-tête que les clients corrects respectent."""
+    @staticmethod
+    def too_many_requests(retry_after: int):
+        """La réponse 429, avec l'en-tête que les clients corrects respectent.
+
+        Depuis l'étape 16, la forme dépend du destinataire: du HTML pour un
+        navigateur, du JSON pour un client d'API. Une page d'erreur HTML rendue
+        à un client qui attend du JSON produit un message d'erreur de PARSING —
+        et personne ne comprend qu'il s'agissait simplement d'attendre.
+
+        Le test porte sur le préfixe d'URL et non sur l'en-tête `Accept`:
+        `/api` répond en JSON quoi qu'en dise le client, ce qui reste vrai même
+        pour une requête tapée à la main sans en-tête.
+        """
+        if request.path.startswith('/api'):
+            corps, statut = json_error("trop de requêtes", 429,
+                                       retry_after=retry_after)
+
+            return corps, statut, {'Retry-After': str(retry_after)}
+
         response = render_template('errors/429.html', retry_after=retry_after)
 
         return response, 429, {'Retry-After': str(retry_after)}

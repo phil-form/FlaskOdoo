@@ -22,6 +22,7 @@ Ces pages sont exactes à l'étape près.
 - [13 — waf-modsecurity](etapes/13-waf-modsecurity.md)
 - [14 — jwt-au-lieu-de-session](etapes/14-jwt-au-lieu-de-session.md)
 - [15 — jwt-refresh-token](etapes/15-jwt-refresh-token.md)
+- [16 — api-rest](etapes/16-api-rest.md)
 
 ## Exercices
 
@@ -44,6 +45,7 @@ importé à l'étape 09).
 - [13 — waf-modsecurity](exercices/13-waf-modsecurity.md)
 - [14 — jwt-au-lieu-de-session](exercices/14-jwt-au-lieu-de-session.md)
 - [15 — jwt-refresh-token](exercices/15-jwt-refresh-token.md)
+- [16 — api-rest](exercices/16-api-rest.md)
 
 ## Chapitres de référence
 
@@ -71,3 +73,4 @@ donc mentionner un détail qui n'arrive qu'une étape plus tard.
 - [18 — Un WAF devant l'application](18-waf-modsecurity.md)
 - [19 — JWT: authentification par token](19-jwt.md)
 - [20 — Refresh token](20-jwt-refresh-token.md)
+- [21 — API JSON](21-api-json.md)
